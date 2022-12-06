@@ -193,7 +193,10 @@ function love.load()
 	love.window.setMode(
 		love.graphics.getWidth(),
 		love.graphics.getHeight(),
-		{resizable=true, vsync=true, msaa=16, minwidth=50, minheight=50}
+		{
+                    resizable=true, vsync=true, msaa=16,
+                    highdpi=true, minwidth=50, minheight=50
+		}
 	)
     love.graphics.setBackgroundColor(1/4, 1/4, 1/4)
     gamePaused = false
