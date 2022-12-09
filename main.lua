@@ -8,15 +8,15 @@ without any warranty.
 ]]--
 
 function refreshBag()
-	bag = {}
-	for i = 1, 7 do
-		bag[i] = i
-	end
-	for i = 1, 7 do
-		local r = love.math.random(i, 7)
-		bag[i], bag[r] = bag[r], bag[i]
-	end
-	return bag
+    bag = {}
+    for i = 1, 7 do
+        bag[i] = i
+    end
+    for i = 1, 7 do
+        local r = love.math.random(i, 7)
+        bag[i], bag[r] = bag[r], bag[i]
+    end
+    return bag
 end
 function lockPiece(piece)
     for _,s in pairs(piece.squares) do
@@ -26,11 +26,11 @@ end
 function getPiece()
     currentPiece = makePiece(nextPiece, false)
     nextPiece = bag[1]
-	if #bag == 1 then
-		refreshBag()
-	else
-		table.remove(bag, 1)
-	end
+    if #bag == 1 then
+        refreshBag()
+    else
+        table.remove(bag, 1)
+    end
     t = 0
     for _,s in pairs(currentPiece.squares) do
         if field[s.x][s.y].color > 0 then
@@ -70,13 +70,13 @@ function newGame() -- (re)sets the game state
             table.insert(field[i], {color = 0, type = "empty"})
         end
     end
-	refreshBag()
+    refreshBag()
     nextPiece = bag[1] -- Get first piece from bag
-	if #bag == 1 then
-		refreshBag()
-	else
-		table.remove(bag, 1)
-	end
+    if #bag == 1 then
+        refreshBag()
+    else
+        table.remove(bag, 1)
+    end
     getPiece() -- Create the piece
     updateShadow()
     if musicEnabled then
@@ -98,24 +98,24 @@ function movePiece(piece, x, y)
     return false
 end
 function setSquareSize()
-	local width = field.width
-	local height = field.height
-	if showScore then
-		width = width + 8
-	end
-	squareSize = math.floor(math.min(
-		love.graphics.getHeight() / height,
-		love.graphics.getWidth() / width
-	))
+    local width = field.width
+    local height = field.height
+    if showScore then
+        width = width + 8
+    end
+    squareSize = math.floor(math.min(
+        love.graphics.getHeight() / height,
+        love.graphics.getWidth() / width
+    ))
 end
 function squareWindow()
-	setSquareSize()
-	local width = field.width
-	local height = field.height
-	if showScore then
-		width = width + 8
-	end
-	love.window.updateMode(width*squareSize, height*squareSize)
+    setSquareSize()
+    local width = field.width
+    local height = field.height
+    if showScore then
+        width = width + 8
+    end
+    love.window.updateMode(width*squareSize, height*squareSize)
     text1x = love.graphics.newFont(squareSize)
     text2x = love.graphics.newFont(squareSize * 2)
 end
@@ -142,24 +142,24 @@ function makePiece(id, isShadow)
     return(piece)
 end
 function copyPiece(piece)
-	-- Creates a copy of a piece, since Lua tables are always passed by reference
-	local newPiece = {}
-	newPiece.squares = {}
-	for i, s in ipairs(piece.squares) do
-		newPiece.squares[i] = {
-			x = s.x,
-			y = s.y,
-			color = s.color,
-			shape = s.shape,
-			rotation = s.rotation,
-			type = s.type
-		}
-	end
-	newPiece.rotatePointX = piece.rotatePointX
-	newPiece.rotatePointY = piece.rotatePointY
-	newPiece.color = piece.color
-	newPiece.id = piece.id
-	return newPiece
+    -- Creates a copy of a piece, since Lua tables are always passed by reference
+    local newPiece = {}
+    newPiece.squares = {}
+    for i, s in ipairs(piece.squares) do
+        newPiece.squares[i] = {
+            x = s.x,
+            y = s.y,
+            color = s.color,
+            shape = s.shape,
+            rotation = s.rotation,
+            type = s.type
+        }
+    end
+    newPiece.rotatePointX = piece.rotatePointX
+    newPiece.rotatePointY = piece.rotatePointY
+    newPiece.color = piece.color
+    newPiece.id = piece.id
+    return newPiece
 end
 function love.load()
     pieces = { -- The different tetrominoes
@@ -190,52 +190,52 @@ function love.load()
         musicEnabled = false
     end
     love.window.setTitle("Tetris!")
-	love.window.setMode(
-		love.graphics.getWidth(),
-		love.graphics.getHeight(),
-		{
+    love.window.setMode(
+        love.graphics.getWidth(),
+        love.graphics.getHeight(),
+        {
                     resizable=true, vsync=true, msaa=16,
                     highdpi=true, minwidth=50, minheight=50
-		}
-	)
+        }
+    )
     love.graphics.setBackgroundColor(1/4, 1/4, 1/4)
     gamePaused = false
     newGame()
     squareWindow() -- Fix window size and aspect ratio
 end
 function love.resize()
-	setSquareSize()
+    setSquareSize()
     text1x = love.graphics.newFont(squareSize)
     text2x = love.graphics.newFont(squareSize * 2)
 end
 function makeRotatedPiece(piece, direction)
-	local rotatedPiece = copyPiece(piece)
-	for _, s in pairs(rotatedPiece.squares) do
-		local storedX = s.x
-		local storedY = s.y
-		s.x = -direction*(storedY - rotatedPiece.rotatePointY) + rotatedPiece.rotatePointX
-		s.y = direction*(storedX - rotatedPiece.rotatePointX) + rotatedPiece.rotatePointY
-		s.rotation = (s.rotation + direction) % 4
-	end
-	return rotatedPiece
+    local rotatedPiece = copyPiece(piece)
+    for _, s in pairs(rotatedPiece.squares) do
+        local storedX = s.x
+        local storedY = s.y
+        s.x = -direction*(storedY - rotatedPiece.rotatePointY) + rotatedPiece.rotatePointX
+        s.y = direction*(storedX - rotatedPiece.rotatePointX) + rotatedPiece.rotatePointY
+        s.rotation = (s.rotation + direction) % 4
+    end
+    return rotatedPiece
 end
 function rotateCurrentPiece(direction)
-	local rotatedPiece = makeRotatedPiece(currentPiece, direction)
-	canSpin = true
-	for _, s in pairs(rotatedPiece.squares) do
-		if
-			s.x < 1
-			or s.x > field.width
-			or s.y < 1
-			or field[s.x][s.y].type == "normal"
-		then
-			canSpin = false
-		end
-	end
-	if canSpin then
-		currentPiece = rotatedPiece
-		updateShadow()
-	end
+    local rotatedPiece = makeRotatedPiece(currentPiece, direction)
+    canSpin = true
+    for _, s in pairs(rotatedPiece.squares) do
+        if
+            s.x < 1
+            or s.x > field.width
+            or s.y < 1
+            or field[s.x][s.y].type == "normal"
+        then
+            canSpin = false
+        end
+    end
+    if canSpin then
+        currentPiece = rotatedPiece
+        updateShadow()
+    end
 end
 function love.keypressed(key)
     if gameOver == false and gamePaused == false then
@@ -293,16 +293,16 @@ function love.keypressed(key)
         newGame()
     elseif key == "p" then
         gamePaused = not gamePaused
-	elseif key == "down" then
-		-- Prevent pieces dropping multiple squares at once when toggling fast drop
-		t = math.min(t, 0.05)
+    elseif key == "down" then
+        -- Prevent pieces dropping multiple squares at once when toggling fast drop
+        t = math.min(t, 0.05)
     end
 end
 function love.update(dt)
-	local dropDelay = 0.75
-	if love.keyboard.isDown("down") then
-		dropDelay = 0.05
-	end
+    local dropDelay = 0.75
+    if love.keyboard.isDown("down") then
+        dropDelay = 0.05
+    end
     if gameOver == false and gamePaused == false then
         if t >= dropDelay then
             if movePiece(currentPiece, 0, 1) then
@@ -315,7 +315,7 @@ function love.update(dt)
             if love.keyboard.isDown("down") then
                 score = score + 1
             end
-			t = t - dropDelay
+            t = t - dropDelay
         end
         t = t + dt
     end
@@ -363,31 +363,31 @@ function updateShadow()
     lockPiece(shadow)
 end
 function inCurrentPiece(x, y)
-	for _, s in pairs(currentPiece.squares) do
-		if s.x == x and s.y == y then
-			return true
-		end
-	end
-	return false
+    for _, s in pairs(currentPiece.squares) do
+        if s.x == x and s.y == y then
+            return true
+        end
+    end
+    return false
 end
 function drawSquare(square, x, y)
-	love.graphics.push()
+    love.graphics.push()
     love.graphics.translate(x, y)
-	love.graphics.scale(squareSize)
-	local scaledX = x/squareSize
-	local scaledY = y/squareSize
+    love.graphics.scale(squareSize)
+    local scaledX = x/squareSize
+    local scaledY = y/squareSize
     if square.type == "shadow" then
-		if not inCurrentPiece(square.x, square.y) then
-			-- Ensure shadow border is equally thick on both sides when scaled
-			shadowBorderPx = math.ceil(shadowBorder*squareSize)/squareSize
+        if not inCurrentPiece(square.x, square.y) then
+            -- Ensure shadow border is equally thick on both sides when scaled
+            shadowBorderPx = math.ceil(shadowBorder*squareSize)/squareSize
 
-			love.graphics.setColor(pieceColors[square.color])
-			love.graphics.rectangle("fill", 0, 0, 1, 1)
-			love.graphics.setColor(0, 0, 0)
-			love.graphics.rectangle("fill", shadowBorderPx, shadowBorderPx, 1 - 2*shadowBorderPx, 1 - 2*shadowBorderPx)
-		end
+            love.graphics.setColor(pieceColors[square.color])
+            love.graphics.rectangle("fill", 0, 0, 1, 1)
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.rectangle("fill", shadowBorderPx, shadowBorderPx, 1 - 2*shadowBorderPx, 1 - 2*shadowBorderPx)
+        end
     elseif square.type == "normal" then
-		love.graphics.push()
+        love.graphics.push()
         love.graphics.translate(0.5, 0.5)
         love.graphics.rotate(square.rotation*math.pi/2)
         love.graphics.translate(-0.5, -0.5)
@@ -404,25 +404,25 @@ function drawSquare(square, x, y)
         elseif square.shape == "full" then
             love.graphics.rectangle("fill", 0, 0, 1, 1)
         end
-		love.graphics.pop()
+        love.graphics.pop()
     end
-	love.graphics.pop()
+    love.graphics.pop()
 end
 function drawField(x0, y0)
-	love.graphics.push()
+    love.graphics.push()
     love.graphics.translate(x0, y0)
     love.graphics.scale(1, -1)
     love.graphics.setColor(0, 0, 0)
     love.graphics.rectangle("fill", 0, 0, field.width * squareSize, field.height * squareSize)
     for i = 1, field.width do
         for l = 1, #field[i] - 3 do
-			drawSquare(field[i][l], (i-1)*squareSize, (l-1)*squareSize)
+            drawSquare(field[i][l], (i-1)*squareSize, (l-1)*squareSize)
         end
     end
     love.graphics.pop()
 end
 function drawCurrentPiece(fieldOffsetX, fieldOffsetY)
-	love.graphics.push()
+    love.graphics.push()
     love.graphics.translate(fieldOffsetX, fieldOffsetY)
     love.graphics.scale(1, -1)
     love.graphics.setColor(pieceColors[currentPiece.color])
@@ -439,17 +439,17 @@ function love.draw()
         drawCurrentPiece(fieldOffsetX, fieldOffsetY)
         love.graphics.translate(fieldOffsetX, fieldOffsetY)
         love.graphics.scale(1, -1)
-		if showScore == true then
-			nextPiecePiece = makeRotatedPiece(makePiece(nextPiece, false), 1)
+        if showScore == true then
+            nextPiecePiece = makeRotatedPiece(makePiece(nextPiece, false), 1)
             for _,s in pairs(nextPiecePiece.squares) do
-				drawSquare(s, (s.x + (math.floor(field.width / 2) + 1))*squareSize, (s.y - field.height / 2)*squareSize)
+                drawSquare(s, (s.x + (math.floor(field.width / 2) + 1))*squareSize, (s.y - field.height / 2)*squareSize)
             end
-			if #heldPiece.squares > 0 then
-				for _,s in pairs(makeRotatedPiece(heldPiece, 1).squares) do
-					drawSquare(s, (s.x - math.ceil(field.width/2) - 3) * squareSize, (s.y - field.height / 2)*squareSize)
-				end
-			end
-		end
+            if #heldPiece.squares > 0 then
+                for _,s in pairs(makeRotatedPiece(heldPiece, 1).squares) do
+                    drawSquare(s, (s.x - math.ceil(field.width/2) - 3) * squareSize, (s.y - field.height / 2)*squareSize)
+                end
+            end
+        end
     else
         love.graphics.origin()
         love.graphics.setFont(text2x)
