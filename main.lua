@@ -7,6 +7,10 @@ notice and this notice are preserved.  This file is offered as-is,
 without any warranty.
 ]]--
 
+local bag, currentPiece, nextPiece, score, showScore, shadow, t, gameOver,
+    hasHeld, heldPiece, shadowBorder, cornerRadius, field, squareSize, volume,
+    pieceColors, pieces, musicEnabled, gamePaused, text1x, text2x
+
 local function refreshBag()
     bag = {}
     for i = 1, 7 do
@@ -240,7 +244,7 @@ local function makeRotatedPiece(piece, direction)
 end
 local function rotateCurrentPiece(direction)
     local rotatedPiece = makeRotatedPiece(currentPiece, direction)
-    canSpin = true
+    local canSpin = true
     for _, s in pairs(rotatedPiece.squares) do
         if
             s.x < 1
@@ -257,9 +261,9 @@ local function rotateCurrentPiece(direction)
     end
 end
 local function checkLines()
-    linesCleared = 0
+    local linesCleared = 0
     for l = 1, field.height do
-        clearLine = true
+        local clearLine = true
         for i = 1, field.width do
             if field[i][field.height + 1 - l].color < 1 then
                 clearLine = false
@@ -362,7 +366,7 @@ function love.update(dt)
         t = t + dt
     end
 end
-function inCurrentPiece(x, y)
+local function inCurrentPiece(x, y)
     for _, s in pairs(currentPiece.squares) do
         if s.x == x and s.y == y then
             return true
@@ -370,7 +374,7 @@ function inCurrentPiece(x, y)
     end
     return false
 end
-function drawSquare(square, x, y)
+local function drawSquare(square, x, y)
     love.graphics.push()
     love.graphics.translate(x, y)
     love.graphics.scale(squareSize)
@@ -379,7 +383,7 @@ function drawSquare(square, x, y)
     if square.type == "shadow" then
         if not inCurrentPiece(square.x, square.y) then
             -- Ensure shadow border is equally thick on both sides when scaled
-            shadowBorderPx = math.ceil(shadowBorder*squareSize)/squareSize
+            local shadowBorderPx = math.ceil(shadowBorder*squareSize)/squareSize
 
             love.graphics.setColor(pieceColors[square.color])
             love.graphics.rectangle("fill", 0, 0, 1, 1)
@@ -408,7 +412,7 @@ function drawSquare(square, x, y)
     end
     love.graphics.pop()
 end
-function drawField(x0, y0)
+local function drawField(x0, y0)
     love.graphics.push()
     love.graphics.translate(x0, y0)
     love.graphics.scale(1, -1)
@@ -440,7 +444,7 @@ function love.draw()
         love.graphics.translate(fieldOffsetX, fieldOffsetY)
         love.graphics.scale(1, -1)
         if showScore == true then
-            nextPiecePiece = makeRotatedPiece(makePiece(nextPiece, false), 1)
+            local nextPiecePiece = makeRotatedPiece(makePiece(nextPiece, false), 1)
             for _,s in pairs(nextPiecePiece.squares) do
                 drawSquare(s, (s.x + (math.floor(field.width / 2) + 1))*squareSize, (s.y - field.height / 2)*squareSize)
             end
