@@ -70,8 +70,12 @@ local function getPiece()
 end
 local function movePiece(piece, x, y)
     for _,s in pairs(piece.squares) do
-        if s.y - y < 1 or s.x + x < 1 or s.x + x > field.width or field[s.x + x][s.y - y].type == "normal" or field[s.x][s.y].type == "normal" then
-            return true
+        if s.y - y < 1 or s.x + x < 1
+            or s.x + x > field.width
+            or field[s.x + x][s.y - y].type == "normal"
+            or field[s.x][s.y].type == "normal"
+        then
+            return false
         end
     end
     for _,s in pairs(piece.squares) do
@@ -80,7 +84,7 @@ local function movePiece(piece, x, y)
     end
     piece.rotatePointY = currentPiece.rotatePointY - y
     piece.rotatePointX = currentPiece.rotatePointX + x
-    return false
+    return true
 end
 local function updateShadow()
     shadow = makePiece(currentPiece.id, true)
@@ -98,7 +102,7 @@ local function updateShadow()
         s.x = currentPiece.squares[i].x
         s.y = currentPiece.squares[i].y
     end
-    while not (movePiece(shadow, 0, 1)) do end
+    while movePiece(shadow, 0, 1) do end
     lockPiece(shadow)
 end
 local function newGame() -- (re)sets the game state
@@ -160,7 +164,7 @@ local function squareWindow()
     if showScore then
         width = width + 8
     end
-    love.window.updateMode(width*squareSize, height*squareSize)
+    love.window.updateMode(width*squareSize, height*squareSize, {})
     text1x = love.graphics.newFont(squareSize)
     text2x = love.graphics.newFont(squareSize * 2)
 end
@@ -217,8 +221,12 @@ function love.load()
         love.graphics.getWidth(),
         love.graphics.getHeight(),
         {
-                    resizable=true, vsync=true, msaa=16,
-                    highdpi=true, minwidth=50, minheight=50
+            resizable=true,
+            vsync=true,
+            msaa=16,
+            highdpi=true,
+            minwidth=50,
+            minheight=50
         }
     )
     love.graphics.setBackgroundColor(1/4, 1/4, 1/4)
@@ -314,7 +322,9 @@ function love.keypressed(key)
                 hasHeld = true
             end
         elseif key == "up" then
-            while movePiece(currentPiece, 0, 1) == false do score = score + 1 end
+            while movePiece(currentPiece, 0, 1) do
+                score = score + 1
+            end
             lockPiece(currentPiece)
             checkLines()
             getPiece()
@@ -351,7 +361,7 @@ function love.update(dt)
     end
     if gameOver == false and gamePaused == false then
         if t >= dropDelay then
-            if movePiece(currentPiece, 0, 1) then
+            if not movePiece(currentPiece, 0, 1) then
                 lockPiece(currentPiece)
                 checkLines()
                 getPiece()
