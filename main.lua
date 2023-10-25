@@ -107,6 +107,8 @@ function setSquareSize()
 		love.graphics.getHeight() / height,
 		love.graphics.getWidth() / width
 	))
+    text1x = love.graphics.newFont(squareSize)
+    text2x = love.graphics.newFont(squareSize * 2)
 end
 function squareWindow()
 	setSquareSize()
@@ -171,6 +173,13 @@ function love.load()
         {{x=2, y=2, shape="corner", rotation=2}, {x=2, y=1, shape="corner", rotation=0}, {x=1, y=2, shape="end", rotation=0}, {x=3, y=1, shape="end", rotation=2}, color = 6, rotateX = 2, rotateY = 2}, -- Z Piece
         {{x=2, y=2, shape="corner", rotation=3}, {x=2, y=1, shape="corner", rotation=1}, {x=1, y=1, shape="end", rotation=0}, {x=3, y=2, shape="end", rotation=2}, color = 7, rotateX = 2, rotateY = 2}, -- S Piece
     }
+    sprites = {}
+    for i = 1, #pieces do
+        table.insert(sprites, love.graphics.newImage("marre_nykub"..i..".png"))
+        sprites[i]:setFilter("nearest", "nearest")
+    end
+    bgSprite = love.graphics.newImage("marre_bakground.png")
+    bgSprite:setFilter("nearest", "nearest")
     pieceColors = { -- The piece colors
         {1,   0,     1   },
         {0.5, 0.667, 1   },
@@ -198,13 +207,9 @@ function love.load()
     love.graphics.setBackgroundColor(1/4, 1/4, 1/4)
     gamePaused = false
     newGame()
-    squareWindow() -- Fix window size and aspect ratio
+    setSquareSize()
 end
-function love.resize()
-	setSquareSize()
-    text1x = love.graphics.newFont(squareSize)
-    text2x = love.graphics.newFont(squareSize * 2)
-end
+love.resize = setSquareSize
 function makeRotatedPiece(piece, direction)
 	local rotatedPiece = copyPiece(piece)
 	for _, s in pairs(rotatedPiece.squares) do
@@ -218,7 +223,7 @@ function makeRotatedPiece(piece, direction)
 end
 function rotateCurrentPiece(direction)
 	local rotatedPiece = makeRotatedPiece(currentPiece, direction)
-	canSpin = true
+	local canSpin = true
 	for _, s in pairs(rotatedPiece.squares) do
 		if
 			s.x < 1
@@ -233,6 +238,15 @@ function rotateCurrentPiece(direction)
 		currentPiece = rotatedPiece
 		updateShadow()
 	end
+end
+function toggleFullscreen()
+    if not isFullscreen then
+        isFullscreen = true
+    else
+        isFullscreen = false
+    end
+    love.window.setMode(540, 600, {resizable=true, vsync=true, msaa=16, minwidth=50, minheight=50, fullscreen = isFullscreen})
+    love.resize()
 end
 function love.keypressed(key)
     if gameOver == false and gamePaused == false then
@@ -273,12 +287,14 @@ function love.keypressed(key)
             hasHeld = false
         elseif key == "z" then
             rotateCurrentPiece(1)
-        elseif key == "x" then 
+        elseif key == "x" then
             rotateCurrentPiece(-1)
         end
     end
     if key == "s" then
         showScore = not showScore
+    elseif key == "f" then
+        toggleFullscreen()
     elseif key == "m" then
         if musicEnabled then
             volume = volume - 2 * volume + 0.17
@@ -371,36 +387,18 @@ function drawSquare(square, x, y)
 	love.graphics.push()
     love.graphics.translate(x, y)
 	love.graphics.scale(squareSize)
-	local scaledX = x/squareSize
-	local scaledY = y/squareSize
     if square.type == "shadow" then
 		if not inCurrentPiece(square.x, square.y) then
-			-- Ensure shadow border is equally thick on both sides when scaled
-			shadowBorderPx = math.ceil(shadowBorder*squareSize)/squareSize
-
-			love.graphics.setColor(pieceColors[square.color])
-			love.graphics.rectangle("fill", 0, 0, 1, 1)
-			love.graphics.setColor(0, 0, 0)
-			love.graphics.rectangle("fill", shadowBorderPx, shadowBorderPx, 1 - 2*shadowBorderPx, 1 - 2*shadowBorderPx)
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.draw(sprites[square.color], 0, 0, 0, 1/16, 1/16)
 		end
     elseif square.type == "normal" then
 		love.graphics.push()
         love.graphics.translate(0.5, 0.5)
         love.graphics.rotate(square.rotation*math.pi/2)
         love.graphics.translate(-0.5, -0.5)
-        love.graphics.setColor(pieceColors[square.color])
-        if square.shape == "end" then
-            love.graphics.rectangle("fill", cornerRadius, 0, 1-cornerRadius, 1)
-            love.graphics.rectangle("fill", 0, cornerRadius, 1, 1-2*cornerRadius)
-            love.graphics.circle("fill", cornerRadius, cornerRadius, cornerRadius)
-            love.graphics.circle("fill", cornerRadius, 1-cornerRadius, cornerRadius)
-        elseif square.shape == "corner" then
-            love.graphics.rectangle("fill", cornerRadius, 0, 1-cornerRadius, 1)
-            love.graphics.rectangle("fill", 0, cornerRadius, 1, 1-cornerRadius)
-            love.graphics.circle("fill", cornerRadius, cornerRadius, cornerRadius)
-        elseif square.shape == "full" then
-            love.graphics.rectangle("fill", 0, 0, 1, 1)
-        end
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.draw(sprites[square.color], 0, 0, 0, 1/16, 1/16)
 		love.graphics.pop()
     end
 	love.graphics.pop()
@@ -408,9 +406,15 @@ end
 function drawField(x0, y0)
 	love.graphics.push()
     love.graphics.translate(x0, y0)
+	love.graphics.push()
+    love.graphics.translate(0, -field.height*squareSize)
+
+    love.graphics.scale(squareSize/16, squareSize/16)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(bgSprite)
+
+    love.graphics.pop()
     love.graphics.scale(1, -1)
-    love.graphics.setColor(0, 0, 0)
-    love.graphics.rectangle("fill", 0, 0, field.width * squareSize, field.height * squareSize)
     for i = 1, field.width do
         for l = 1, #field[i] - 3 do
 			drawSquare(field[i][l], (i-1)*squareSize, (l-1)*squareSize)
